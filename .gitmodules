@@ -1,3 +1,0 @@
-[submodule "ECurve"]
-	path = ECurve
-	url = git@github.com:CryptoCoinSwift/ECurve.git

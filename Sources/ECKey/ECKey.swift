@@ -6,10 +6,8 @@
 
 import Foundation
 
-#if os(OSX)
 import ECurve
 import UInt256
-#endif
 
 public class ECKey {
     public let privateKey: UInt256
@@ -44,7 +42,7 @@ public class ECKey {
     
     
     public convenience init(_ privateKeyHex: String, _ curve: ECurve, skipPublicKeyGeneration: Bool = false) {
-        self.init(UInt256(hexStringValue: privateKeyHex), curve, skipPublicKeyGeneration: skipPublicKeyGeneration)
+        self.init(UInt256(hexString: privateKeyHex), curve, skipPublicKeyGeneration: skipPublicKeyGeneration)
     }
     
     public var privateKeyHexString: String {
@@ -62,20 +60,20 @@ public class ECKey {
     }
     
     public class func pointFromHex (hexString: String, _ curve: ECurve) -> ECPoint {
-        assert(countElements(hexString) == 130, "Wrong size")
+        assert(hexString.characters.count == 130, "Wrong size")
         
-        let x: String = (hexString as NSString).substringWithRange(NSRange(location: 2, length: 64))
-        let y: String = (hexString as NSString).substringWithRange(NSRange(location: 66, length: 64))
+      let x: String = (hexString as NSString).substring(with: NSRange(location: 2, length: 64))
+      let y: String = (hexString as NSString).substring(with: NSRange(location: 66, length: 64))
         
         return ECPoint(x: FFInt(x, curve.field), y: FFInt(y, curve.field), curve: curve)
     }
     
-    public class func createRandom (curve: ECurve, skipPublicKeyGeneration: Bool = false) -> ECKey {
+    public class func createRandom (_ curve: ECurve, skipPublicKeyGeneration: Bool = false) -> ECKey {
         // Private key is a random 256 bit integer smaller than n.
         return ECKey(UInt256.secureRandom(curve.n), curve, skipPublicKeyGeneration: skipPublicKeyGeneration)
     }
     
-    public func sign (digest: UInt256) -> (UInt256, UInt256) {
+    public func sign (_ digest: UInt256) -> (UInt256, UInt256) {
         
         let field = FiniteField.PrimeField(p: curve.n)
         let zero = field.int(0)
@@ -95,7 +93,7 @@ public class ECKey {
                 let R = k * self.curve.G
                 
                 switch R.coordinate {
-                case let .Affine(x,y):
+                case let .Affine(x,_):
                     r = field.int(x!.value)
 
                 default:
@@ -113,7 +111,7 @@ public class ECKey {
         
     }
     
-    public class func verifySignature(digest: UInt256, r: UInt256, s:UInt256, publicKey: ECPoint) -> Bool {
+    public class func verifySignature(_ digest: UInt256, r: UInt256, s:UInt256, publicKey: ECPoint) -> Bool {
         
         let curve = publicKey.curve
         let field = FiniteField.PrimeField(p: curve.n)
@@ -131,7 +129,7 @@ public class ECKey {
         let P = u1.value * curve.G + u2.value * publicKey
                 
         switch P.coordinate {
-        case let .Affine(x,y):
+        case let .Affine(x,_):
             let px = field.int(x!.value)
             return px == field.int(r)
         default:
@@ -141,22 +139,22 @@ public class ECKey {
 
     }
     
-    public class func der (r: UInt256, _ s: UInt256) -> NSData {
+    public class func der (_ r: UInt256, _ s: UInt256) -> NSData {
         // 0x30, 0x45, 0x02, 0x20
         
         var bytes: [UInt8] = [0x30, 0x45, 0x02, 0x20]
-        var signature = NSMutableData(bytes: &bytes, length: bytes.count)
+        let signature = NSMutableData(bytes: &bytes, length: bytes.count)
         
-        signature.appendData(r.toData)
+      signature.append(r.toData)
         bytes = [0x02, 0x21, 0x00]
-        signature.appendBytes(&bytes, length: 3)
+      signature.append(&bytes, length: 3)
         
-        signature.appendData(s.toData)
+      signature.append(s.toData)
         
         return signature as NSData
     }
     
-    public class func importDer (data: NSData) -> (UInt256, UInt256) {
+    public class func importDer (_ data: NSData) -> (UInt256, UInt256) {
         var R: [UInt32] = [0,0,0,0,0,0,0,0]
         var S: [UInt32] = [0,0,0,0,0,0,0,0]
         

@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ECurve",
+        "repositoryURL": "https://github.com/crmitchelmore/ECurve.git",
+        "state": {
+          "branch": null,
+          "revision": "bdabf11c520f310ff85d9d035f5fd2f9f7eb7c68",
+          "version": "1.0.2"
+        }
+      },
+      {
+        "package": "UInt256",
+        "repositoryURL": "https://github.com/crmitchelmore/UInt256.git",
+        "state": {
+          "branch": null,
+          "revision": "f1bc266cc3049298555293e1e9a14ed5d6e0b6bb",
+          "version": "1.0.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
